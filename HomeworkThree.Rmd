@@ -1,0 +1,230 @@
+---
+title: "Homework 3"
+author: "Michael Vargas"
+date: "April 30, 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr)
+library(data.table)
+library(systemfit)
+library(lmtest)
+library(sandwich)
+library(tidyr)
+```
+ Part 1: A First Look at Observational Data 
+```{r, echo = TRUE}
+# 1 & 2 )
+
+setwd("C:\\Users\\micha\\Desktop\\ECON 488 CAUSAL INFERENCE\\Homework3")
+nswCPSData <- read.csv("nswcps.csv")
+nswPSIDData <- read.csv("nswpsid.csv")
+
+# Calculate mean for vars in CPS and PSID data sets
+
+ageCPS <- nswCPSData$age[nswCPSData$treat == 0]
+meanAgeCPS <- mean(ageCPS)
+agePSID <- nswPSIDData$age[nswPSIDData$treat == 0]
+meanAgePSID <- mean(agePSID)
+
+eduCPS <-nswCPSData$edu[nswCPSData$treat == 0]
+meanEduCPS <- mean(eduCPS)
+eduPSID <- nswPSIDData$edu[nswPSIDData$treat == 0]
+meanEduPSID <- mean(nswPSIDData$edu)
+
+noDegreeCPS <- nswCPSData$nodegree[nswCPSData$treat == 0]
+meanNoDegreeCPS <- mean(noDegreeCPS)
+noDegreePSID <- nswPSIDData$nodegree[nswPSIDData$treat == 0]
+meanNoDegreePSID <- mean(noDegreePSID)
+
+blackCPS <- nswCPSData$black[nswCPSData$treat == 0]
+meanBlackCPS <- mean(blackCPS)
+blackPSID <- nswPSIDData$black[nswPSIDData$treat == 0]
+meanBlackPSID <- mean(blackPSID)
+
+hispanicCPS <- nswCPSData$hisp[nswCPSData$treat == 0]
+meanHispanicCPS <- mean(hispanicCPS)
+hispanicPSID <- nswPSIDData$hisp[nswPSIDData$treat == 0]
+meanHispanicPSID <- mean(hispanicPSID)
+
+marriedCPS <- nswCPSData$married[nswCPSData$treat == 0]
+meanMarriedCPS <- mean(marriedCPS)
+marriedPSID <- nswPSIDData$married[nswPSIDData$treat == 0]
+meanMarriedPSID <- mean(marriedPSID)
+
+unemployed74CPS <- nswCPSData$u74[nswCPSData$treat == 0]
+meanUnemployed74CPS <- mean(unemployed74CPS)
+unemployed74PSID <- nswPSIDData$u74[nswPSIDData$treat == 0]
+meanUnemployed74PSID <- mean(unemployed74PSID)
+
+unemployed75CPS <- nswCPSData$u75[nswCPSData$treat == 0]
+meanUnemployed75CPS <- mean(unemployed75CPS)
+unemployed75PSID <- nswPSIDData$u75[nswPSIDData$treat == 0]
+meanUnemployed75PSID <- mean(unemployed75PSID)
+
+realEarnings74CPS <- nswCPSData$re74[nswCPSData$treat == 0]
+meanRealEarnings74CPS <- mean(realEarnings74CPS)
+realEarnings74PSID <- nswPSIDData$re74[nswPSIDData$treat == 0]
+meanRealEarnings74PSID <- mean(realEarnings74PSID)
+
+realEarnings75CPS <- nswCPSData$re75[nswCPSData$treat == 0]
+meanRealEarnings75CPS <- mean(realEarnings75CPS)
+realEarnings75PSID <- nswPSIDData$re75[nswPSIDData$treat == 0]
+meanRealEarnings75PSID <- mean(realEarnings75PSID)
+
+realEarnings78CPS <- nswCPSData$re78[nswCPSData$treat == 0]
+meanRealEarnings78CPS <- mean(realEarnings78CPS)
+realEarnings78PSID <- nswPSIDData$re78[nswPSIDData$treat == 0]
+meanRealEarnings78PSID <- mean(realEarnings78PSID)
+
+PSID1 <- c(meanAgePSID, 
+           meanEduPSID, 
+           meanBlackPSID,
+           meanHispanicPSID, 
+           meanMarriedPSID,
+           meanNoDegreePSID,
+           meanRealEarnings74PSID,
+           meanRealEarnings75PSID, 
+           meanRealEarnings78PSID, 
+           meanUnemployed74PSID,
+           meanUnemployed75PSID)
+
+CPS1 <- c(meanAgeCPS, 
+          meanEduCPS, 
+          meanBlackCPS,
+          meanHispanicCPS, 
+          meanMarriedCPS,
+          meanNoDegreeCPS,
+          meanRealEarnings74CPS,
+          meanRealEarnings75CPS, 
+          meanRealEarnings78CPS, 
+          meanUnemployed74CPS,
+          meanUnemployed75CPS)
+
+names <- c("age", "edu","black", "hisp", 
+           "married", "nodegree", "re74", 
+           "re75", "re78", "u74", "u75")
+
+sampleAveragesForControls <- data.table(variables = names, 
+                                        controlPSID1 = round(PSID1, 3), 
+                                        controlCPS1 = round(CPS1, 3))
+
+
+
+sampleAveragesForControls
+```
+3) The distributions of the predetermined characteristics for the observational (survey) and experimental control groups look similar. This suggests that researchers may use the observational sample instead of the experimental sample in order to exploit the large sample sizes (and their estimator-enhancing properties). In this sense the CPS-1 and PSID-1 sample are "good".
+
+4) This was done to exploit the large sample size properties of the survey samples. Since the predetermined characteristics for the control group in the survey samples are distributed similarly (but not exactly) to the predetermined charactertistics for the control group in the RCT, Dehajia and Wahba were able to substitute the survey samples in place of the RCT samples. Also, they still used the RCT sample for the treated group because they know with greater certainty that the individuals were offered training compared to the individuals in the survey samples, who may not have been truthful about their training offer status (thus using the treated in the survey samples may lead to a bias in the ATE estimate). The survey samples are much larger than the RCT samples, allowing for a much more unbiased and consistent estimator for the ATE.
+
+Part 2: Regression-based Estimation of TE
+
+1) There is a large amount of unaccounted variance in model (indicated by the low adjusted R-squared). This may be a hint that the difference in average earnings between the treatment and control groups is influenced by variables other than the training offer. When these variables are not included in the model, the ATE estimator may be biased and inconsistent (due to high unaccounted variance), despite being statistically significant.
+
+```{r}
+regressionSpecTwo <- lm(nswPSIDData$re78 ~ nswPSIDData$treat, data = nswPSIDData)
+summary(regressionSpecTwo)
+```
+
+```{r}
+# Robust SE's
+coeftest(regressionSpecTwo, vcov = vcovHC , type = "HC0")[,2]
+```
+
+2) 
+```{r}
+regressionSpecThree <- lm(nswPSIDData$re78 ~ nswPSIDData$age +
+                        I(nswPSIDData$age^2) + nswPSIDData$treat +
+                        nswPSIDData$edu + nswPSIDData$nodegree +
+                        nswPSIDData$black + nswPSIDData$hisp +
+                        nswPSIDData$re74 + nswPSIDData$re75, 
+                        data = nswPSIDData)
+summary(regressionSpecThree)
+```
+
+```{r}
+# Robust SE's
+coeftest(regressionSpecThree, vcov = vcovHC , type = "HC0")[,2]
+```
+
+3) The BA estimator is misleading because average outcomes will change (and in this case presumably increase) overe time, regardless of treatment. Thus the difference in average earnings for the treated over time may be due other unobservable confounders, not the treatment. 
+```{r}
+# Convert from wide to long data, add year indicator
+earnsDataSet <- nswPSIDData
+longEarnsDataSet <- gather(earnsDataSet, key = "Year", value = "earns", re78, re75)
+longEarnsDataSet$D78 <- ifelse(longEarnsDataSet$Year == "re78", 1, 0)
+
+# Crate dataframe with only treated units
+longEarnsDataSetBA <- subset(longEarnsDataSet,!longEarnsDataSet$treat == 0)
+
+regressionSpecFour <- lm(longEarnsDataSetBA$earns ~ longEarnsDataSetBA$D78, data = longEarnsDataSetBA)
+summary(regressionSpecFour)
+```
+
+```{r}
+# Robust SE's
+coeftest(regressionSpecFour, vcov = vcovHC , type = "HC0")[,2]
+```
+
+4)
+
+```{r}
+# A)
+regressionSpecFive <- lm(longEarnsDataSet$earns ~ longEarnsDataSet$D78 * longEarnsDataSet$treat, 
+                         data = longEarnsDataSet)
+summary(regressionSpecFive)
+```
+
+```{r}
+# Robust SE's
+coeftest(regressionSpecFive, vcov = vcovHC , type = "HC0")[,2]
+```
+
+```{r}
+# B)
+
+estimateDD <- mean(longEarnsDataSet[longEarnsDataSet$treat == 1 & 
+                   longEarnsDataSet$D78 == 1, "earns"]) - 
+              mean(longEarnsDataSet[longEarnsDataSet$treat == 1 & 
+                   longEarnsDataSet$D78 == 0, "earns"]) -
+              (mean(longEarnsDataSet[longEarnsDataSet$treat == 0 & 
+                   longEarnsDataSet$D78 == 1, "earns"]) -
+              mean(longEarnsDataSet[longEarnsDataSet$treat == 0 & 
+                   longEarnsDataSet$D78 == 0, "earns"]))
+estimateDD
+```
+C) The Difference-in-Difference estimator controls for both observable and hidden confounders by subtracting off any inherent differences in average outcomes without treatment over the time period (the second term in the equation from part C). This takes care of the fact that average outcomes with/without treatment would be different in the post-treatment period compared to the pre-treatment period anyway, due to unobservable variables influencing the average outcomes over time.
+
+5) The two indicator variables and their interaction became statistically significant at the 10% level after the covariates were added to the model, yet the Difference-in-Difference estimate of the ATE did not change.
+```{r}
+regressionSpecSix <- lm(longEarnsDataSet$earns ~ longEarnsDataSet$D78 * 
+                        longEarnsDataSet$treat + longEarnsDataSet$age +
+                        I(longEarnsDataSet$age^2) +longEarnsDataSet$married +
+                        longEarnsDataSet$edu + longEarnsDataSet$nodegree +
+                        longEarnsDataSet$black + longEarnsDataSet$hisp , data = longEarnsDataSet)
+summary(regressionSpecSix)
+```
+
+```{r}
+# Robust SE's
+coeftest(regressionSpecSix, vcov = vcovHC , type = "HC0")[,2]
+```
+6) No. You need to follow the same individuals and their earnings from one time period to the next, which is what panel data does. Repeated cross-sectional would take a random sample of the population at different points in time, meaning the sample does not have to contain the same individuals. 
+
+```{r}
+estimator <- c("Treatment-Control",  "Regression-Adjusted Treatment-Control",
+               "Before-After", "Diff-in-Diff")
+parameterComparison <- c("Alpha, Spec. 2", "Alpha, Spec. 3", "Alpha, Spec. 4", "Alpha, Spec. 5")
+estimate <- c(-15204.8, 217.9, 4817.1, 2326.505)
+standardErrors <- c(655.67, 766.4, 623.28, 1126.73)
+finalTable <- data.table(estimator = estimator, parameterComparison = parameterComparison,
+                         estimate = estimate, standardErrors = standardErrors)
+finalTable
+```
+7) As the models grew in sophistication, the SE's for the estimates fluctuated a bit. Without controlling for time or predetermined characteristics, the first ATE estimate was negative, yet after controlling for predetermined characteristics (and subsequently time in the Before - After specification), we see the ATE turn positive. This could mean the selection bias effect (of the confounding variables) might have been so strong without controlling for time or the other covariates, it turned the ATE negative, when it may be actually positive. 
